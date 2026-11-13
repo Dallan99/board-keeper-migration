@@ -1,0 +1,72 @@
+[
+ {
+  "capability": "code",
+  "source": "index.html + server.js (Node, no deps)",
+  "outcome": "migrate",
+  "status": "verified",
+  "next_action": "none"
+ },
+ {
+  "capability": "schema",
+  "source": "data/db.json (JSON file)",
+  "outcome": "migrate",
+  "status": "verified",
+  "next_action": "none"
+ },
+ {
+  "capability": "records",
+  "source": "data/seed.json (196 items)",
+  "outcome": "migrate",
+  "status": "verified",
+  "next_action": "Seed imported (196); send current data/db.json if the team already edited items"
+ },
+ {
+  "capability": "auth identities",
+  "source": "none (no login, name stored in browser)",
+  "outcome": "not_applicable",
+  "status": "verified",
+  "next_action": "none"
+ },
+ {
+  "capability": "authorization",
+  "source": "open edit for anyone with the URL",
+  "outcome": "preserve",
+  "status": "verified",
+  "next_action": "none"
+ },
+ {
+  "capability": "backups",
+  "source": "daily data/backups JSON",
+  "outcome": "replaced by Lovable Cloud backups",
+  "status": "accepted",
+  "next_action": "none"
+ },
+ {
+  "capability": "uploaded file bytes",
+  "source": "none",
+  "outcome": "not_applicable",
+  "status": "verified",
+  "next_action": "none"
+ },
+ {
+  "capability": "external providers/webhooks/schedules/secrets",
+  "source": "none",
+  "outcome": "not_applicable",
+  "status": "verified",
+  "next_action": "none"
+ },
+ {
+  "capability": "cutover",
+  "source": "self-hosted node server",
+  "outcome": "pending",
+  "status": "pending",
+  "next_action": "User exports current data/db.json if it diverged from seed"
+ },
+ {
+  "capability": "verification",
+  "source": "-",
+  "outcome": "done",
+  "status": "verified",
+  "next_action": "none"
+ }
+]

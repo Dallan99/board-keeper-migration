@@ -28,3 +28,5 @@ use the editor.
   own key and store it in Secrets.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
+
+- The XPT board UI is the original self-contained page in `src/legacy/board.html`, served raw by `src/routes/index.tsx`; it calls relative `api/items` routes backed by the `xpt_items` table via the server-only admin client (no login by design, table has no client policies).

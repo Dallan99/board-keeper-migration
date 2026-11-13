@@ -10,33 +10,68 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiItemsIndexRouteImport } from './routes/api/items/index'
+import { Route as ApiItemsIdRouteImport } from './routes/api/items/$id'
+import { Route as ApiItemsIdComentariosRouteImport } from './routes/api/items/$id.comentarios'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiItemsIndexRoute = ApiItemsIndexRouteImport.update({
+  id: '/api/items/',
+  path: '/api/items/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiItemsIdRoute = ApiItemsIdRouteImport.update({
+  id: '/api/items/$id',
+  path: '/api/items/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiItemsIdComentariosRoute = ApiItemsIdComentariosRouteImport.update({
+  id: '/comentarios',
+  path: '/comentarios',
+  getParentRoute: () => ApiItemsIdRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/api/items/$id': typeof ApiItemsIdRouteWithChildren
+  '/api/items/': typeof ApiItemsIndexRoute
+  '/api/items/$id/comentarios': typeof ApiItemsIdComentariosRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/api/items/$id': typeof ApiItemsIdRouteWithChildren
+  '/api/items': typeof ApiItemsIndexRoute
+  '/api/items/$id/comentarios': typeof ApiItemsIdComentariosRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/api/items/$id': typeof ApiItemsIdRouteWithChildren
+  '/api/items/': typeof ApiItemsIndexRoute
+  '/api/items/$id/comentarios': typeof ApiItemsIdComentariosRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    '/' | '/api/items/$id' | '/api/items/' | '/api/items/$id/comentarios'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/api/items/$id' | '/api/items' | '/api/items/$id/comentarios'
+  id:
+    | '__root__'
+    | '/'
+    | '/api/items/$id'
+    | '/api/items/'
+    | '/api/items/$id/comentarios'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ApiItemsIdRoute: typeof ApiItemsIdRouteWithChildren
+  ApiItemsIndexRoute: typeof ApiItemsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +83,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/items/': {
+      id: '/api/items/'
+      path: '/api/items'
+      fullPath: '/api/items/'
+      preLoaderRoute: typeof ApiItemsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/items/$id': {
+      id: '/api/items/$id'
+      path: '/api/items/$id'
+      fullPath: '/api/items/$id'
+      preLoaderRoute: typeof ApiItemsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/items/$id/comentarios': {
+      id: '/api/items/$id/comentarios'
+      path: '/comentarios'
+      fullPath: '/api/items/$id/comentarios'
+      preLoaderRoute: typeof ApiItemsIdComentariosRouteImport
+      parentRoute: typeof ApiItemsIdRoute
+    }
   }
 }
 
+interface ApiItemsIdRouteChildren {
+  ApiItemsIdComentariosRoute: typeof ApiItemsIdComentariosRoute
+}
+
+const ApiItemsIdRouteChildren: ApiItemsIdRouteChildren = {
+  ApiItemsIdComentariosRoute: ApiItemsIdComentariosRoute,
+}
+
+const ApiItemsIdRouteWithChildren = ApiItemsIdRoute._addFileChildren(
+  ApiItemsIdRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ApiItemsIdRoute: ApiItemsIdRouteWithChildren,
+  ApiItemsIndexRoute: ApiItemsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
