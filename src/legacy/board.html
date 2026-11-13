@@ -179,6 +179,17 @@ textarea.inp{min-height:62px;resize:vertical}
 .hist b{color:var(--ink);font-weight:600}
 .mf{display:flex;gap:8px;justify-content:flex-end;padding:12px 18px;border-top:1px solid var(--line)}
 .mf .sp{flex:1}
+input[data-combo]{padding-right:28px!important;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2366708a' stroke-width='3'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 9px center;cursor:pointer}
+input[data-combo]:focus{cursor:text}
+.combo-dd{position:fixed;z-index:80;background:#fff;border:1px solid var(--line-2);border-radius:10px;box-shadow:0 12px 32px rgba(20,37,80,.2);max-height:280px;overflow:auto;padding:5px;min-width:200px}
+.combo-dd .op{display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:7px;cursor:pointer;font-size:13.5px}
+.combo-dd .op.hl{background:var(--blue-bg)}
+.combo-dd .op.cur{font-weight:700}
+.combo-dd .op.cur::after{content:"✓";margin-left:auto;color:var(--green)}
+.combo-dd .op.new{color:var(--navy);font-weight:600;border-top:1px solid var(--line);border-radius:0 0 7px 7px;margin-top:3px}
+.combo-dd .op.new b{background:var(--gold);color:var(--navy);border-radius:5px;width:18px;height:18px;display:inline-grid;place-items:center;flex:none}
+.combo-dd .op.clr{color:var(--muted)}
+.combo-dd .hint{padding:6px 9px;color:var(--muted);font-size:12px}
 .toast{position:fixed;right:20px;bottom:20px;background:var(--navy);color:#fff;padding:10px 14px;border-radius:9px;z-index:60;box-shadow:0 8px 24px rgba(0,0,0,.25);font-weight:500;border-left:4px solid var(--gold)}
 .loading{display:grid;place-items:center;height:60vh;color:var(--muted)}
 
@@ -431,9 +442,8 @@ function renderList(list){
   const order = [...areas(),"Sem área"].filter(a=>groups[a]);
   const ar = k => S.sort.k===k ? (S.sort.d>0?" ↑":" ↓") : "";
   const ppl = people();
-  const dl = `<datalist id="dlPeople">${ppl.map(p=>`<option value="${esc(p)}">`).join("")}</datalist>`;
   if(!order.length){ $("#main").innerHTML = `<div class="group"><div class="empty">Nenhum item com esses filtros.</div></div>`; return; }
-  $("#main").innerHTML = dl + order.map(a=>{
+  $("#main").innerHTML = order.map(a=>{
     const its=groups[a]; const done=its.filter(i=>i.status==="Concluído").length; const late=its.filter(i=>dueInfo(i).late).length;
     const allSel = its.every(i=>S.sel.has(i.id));
     return `<section class="group${S.closed.has(a)?" closed":""}" data-area="${esc(a)}">
@@ -447,7 +457,7 @@ function renderList(list){
         <td class="c"><input type="checkbox" data-sel="${esc(it.id)}"${S.sel.has(it.id)?" checked":""}></td>
         <td class="key" style="white-space:nowrap">${esc(it.id)}</td>
         <td class="ti" data-open="${esc(it.id)}">${esc(it.titulo)}${it.quantidade||it.especificacoes?`<div class="sub">${[it.quantidade&&("Qtd: "+it.quantidade),it.especificacoes].filter(Boolean).map(esc).join(" · ")}</div>`:""}${(it.comentarios||[]).length?` <span class="due">💬 ${it.comentarios.length}</span>`:""}</td>
-        <td style="white-space:nowrap">${avatar(it.responsavel)} <input class="inl" list="dlPeople" data-f="responsavel" value="${esc(it.responsavel)}" placeholder="Atribuir…"></td>
+        <td style="white-space:nowrap">${avatar(it.responsavel)} <input class="inl" data-combo="people" autocomplete="off" data-f="responsavel" value="${esc(it.responsavel)}" placeholder="Atribuir…"></td>
         <td><select data-f="status" class="chip st-${STC[it.status]}">${STATUSES.map(s=>`<option${s===it.status?" selected":""}>${s}</option>`).join("")}</select></td>
         <td class="hide-m pr"><span class="pri pri-${esc(it.prioridade)}"></span><select data-f="prioridade">${PRIS.map(p=>`<option${p===it.prioridade?" selected":""}>${p}</option>`).join("")}</select></td>
         <td style="white-space:nowrap"><input type="date" data-f="prazo" value="${esc(it.prazo)}">${d.cls==="late"||d.cls==="soon"?`<div class="due ${d.cls}" style="padding-left:6px">${esc(d.txt.split(" · ")[1]||d.txt)}</div>`:""}</td></tr>`;}).join("")}</tbody></table>
@@ -495,7 +505,7 @@ function renderSelBar(){
   if(S.view!=="list" || !S.sel.size){ el&&el.remove(); return; }
   if(!el){ el=document.createElement("div"); el.id="selbar"; el.className="selbar"; document.body.appendChild(el); }
   el.innerHTML = `<span><b>${S.sel.size}</b> selecionado(s)</span>
-    <input class="inl" list="dlPeople" id="bResp" placeholder="Responsável…">
+    <input class="inl" data-combo="people" autocomplete="off" id="bResp" placeholder="Responsável…">
     <select id="bStatus"><option value="">Status…</option>${STATUSES.map(s=>`<option>${s}</option>`).join("")}</select>
     <select id="bPri"><option value="">Prioridade…</option>${PRIS.map(s=>`<option>${s}</option>`).join("")}</select>
     <input type="date" id="bPrazo" title="Prazo">
@@ -516,8 +526,7 @@ function ensureName(force){
   return new Promise(res=>{
     $("#layer").innerHTML = `<div class="ov"><form class="modal small" id="nameForm"><div class="mh"><b>Como você se chama?</b></div>
       <div style="padding:18px"><p style="margin:0 0 12px;color:var(--muted)">Não há login. Seu nome fica salvo neste navegador e aparece no histórico das alterações e nos comentários.</p>
-      <input class="inp" id="nameInp" list="dlPeople2" value="${esc(me())}" placeholder="Ex.: Fernando" required autocomplete="name">
-      <datalist id="dlPeople2">${people().map(p=>`<option value="${esc(p)}">`).join("")}</datalist></div>
+      <input class="inp" id="nameInp" data-combo="people" value="${esc(me())}" placeholder="Ex.: Fernando" required autocomplete="off"></div>
       <div class="mf"><button type="button" class="btn ghost" id="nameCancel">Cancelar</button><button class="btn navy">Salvar</button></div></form></div>`;
     $("#nameInp").focus();
     $("#nameCancel").onclick=()=>{ $("#layer").innerHTML=""; res(false); };
@@ -548,8 +557,8 @@ function openItem(id, preset){
         <div class="cm">${avatar(me())}<div style="flex:1"><textarea class="inp" id="cmTxt" placeholder="Escreva um comentário, atualização ou pendência…"></textarea><div style="text-align:right;margin-top:6px"><button class="btn navy sm" id="cmSend">Comentar</button></div></div></div></div>`}
     </div><div class="side">
       <label class="f">Status</label>${sel("status",STATUSES)}
-      <label class="f">Área</label><input class="inp" data-k="area" list="dlAreas" value="${esc(it.area)}" placeholder="Escolha ou digite uma nova"><datalist id="dlAreas">${areas().map(a=>`<option value="${esc(a)}">`).join("")}</datalist>
-      <label class="f">Responsável</label><input class="inp" data-k="responsavel" list="dlResp" value="${esc(it.responsavel)}" placeholder="Nome do responsável"><datalist id="dlResp">${people().map(p=>`<option value="${esc(p)}">`).join("")}</datalist>
+      <label class="f">Área</label><input class="inp" data-k="area" data-combo="area" autocomplete="off" value="${esc(it.area)}" placeholder="Selecione ou digite uma nova área">
+      <label class="f">Responsável</label><input class="inp" data-k="responsavel" data-combo="people" autocomplete="off" value="${esc(it.responsavel)}" placeholder="Selecione ou digite um novo nome">
       <label class="f">Prioridade</label>${sel("prioridade",PRIS)}
       <div class="two"><div><label class="f">Início</label><input type="date" class="inp" data-k="inicio" value="${esc(it.inicio)}"></div>
         <div><label class="f">Prazo</label><input type="date" class="inp" data-k="prazo" value="${esc(it.prazo)}"></div></div>
@@ -581,6 +590,52 @@ function openItem(id, preset){
   }
   function restore(p){ const o=$("#ov"); if(!o) return; o.querySelectorAll("[data-k]").forEach(el=>{ if(p[el.dataset.k]!=null) el.value=p[el.dataset.k]; }); }
 }
+
+/* ---------- combo: lista completa ao abrir + opção de adicionar novo ---------- */
+const Combo = (() => {
+  let inp=null, dd=null, hl=0, opts=[], typed=false;
+  const norm = v => (v||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim();
+  const source = el => el.dataset.combo==="area" ? areas() : people();
+  function build(){
+    const q = typed ? inp.value.trim() : "";
+    const all = source(inp); const list = q ? all.filter(o=>norm(o).includes(norm(q))) : all;
+    opts = list.map(v=>({v,label:v}));
+    if(q && !all.some(o=>norm(o)===norm(q))) opts.push({v:q,label:q,isNew:true});
+    if(inp.dataset.combo==="people" && inp.dataset.f==="responsavel" && inp.value && !q) opts.unshift({v:"",label:"Remover responsável",clr:true});
+    const cur = inp.value.trim();
+    if(hl>=opts.length) hl=Math.max(0,opts.length-1);
+    const what = inp.dataset.combo==="area" ? "área" : "responsável";
+    dd.innerHTML = (opts.length ? "" : `<div class="hint">Digite para adicionar ${what === "área" ? "uma nova área" : "um novo responsável"}</div>`) +
+      opts.map((o,i)=>`<div class="op${i===hl?" hl":""}${o.isNew?" new":""}${o.clr?" clr":""}${!o.isNew&&!o.clr&&o.v===cur?" cur":""}" data-i="${i}">${o.isNew?`<b>+</b>Adicionar ${what} “${esc(o.label)}”`:o.clr?"✕ "+esc(o.label):(inp.dataset.combo==="people"?avatar(o.v):"")+`<span>${esc(o.label)}</span>`}</div>`).join("") +
+      (!q && opts.length ? `<div class="hint">Não está na lista? Digite o nome para adicionar.</div>` : "");
+    place();
+    dd.querySelector(".hl")?.scrollIntoView({block:"nearest"});
+  }
+  function place(){ const r=inp.getBoundingClientRect(); dd.style.left=r.left+"px"; dd.style.width=Math.max(r.width,220)+"px";
+    const below = innerHeight-r.bottom; if(below<220 && r.top>below){ dd.style.top=""; dd.style.bottom=(innerHeight-r.top+4)+"px"; } else { dd.style.bottom=""; dd.style.top=(r.bottom+4)+"px"; } }
+  function open(el){ if(inp===el && dd) return; close(); inp=el; typed=false; hl=Math.max(0,source(el).indexOf(el.value.trim()));
+    dd=document.createElement("div"); dd.className="combo-dd";
+    dd.addEventListener("mousedown",e=>e.preventDefault());
+    dd.addEventListener("click",e=>{ const o=e.target.closest(".op"); if(o) pick(opts[+o.dataset.i]); });
+    document.body.appendChild(dd); build(); requestAnimationFrame(()=>{ try{ el.select(); }catch(_){} }); }
+  function close(){ dd&&dd.remove(); dd=null; inp=null; }
+  function pick(o){ const el=inp; close(); if(!o) return; el.value=o.v; el.dispatchEvent(new Event("change",{bubbles:true})); if(el.id==="nameInp"||el.dataset.k) el.focus(); else el.blur(); }
+  document.addEventListener("focusin",e=>{ if(e.target.matches?.("input[data-combo]")) open(e.target); });
+  document.addEventListener("mousedown",e=>{ const el=e.target.closest?.("input[data-combo]"); if(el && el===document.activeElement && !dd) open(el); });
+  document.addEventListener("focusout",e=>{ if(e.target===inp) setTimeout(()=>{ if(document.activeElement!==inp) close(); },0); });
+  document.addEventListener("input",e=>{ if(e.target===inp){ typed=true; hl=0; build(); } });
+  document.addEventListener("keydown",e=>{
+    if(!inp || e.target!==inp) return;
+    if(!dd){ if(e.key==="ArrowDown"){ open(inp); e.preventDefault(); } return; }
+    if(e.key==="ArrowDown"){ hl=Math.min(opts.length-1,hl+1); build(); e.preventDefault(); }
+    else if(e.key==="ArrowUp"){ hl=Math.max(0,hl-1); build(); e.preventDefault(); }
+    else if(e.key==="Enter"){ if(opts[hl]){ e.preventDefault(); e.stopPropagation(); pick(opts[hl]); } else close(); }
+    else if(e.key==="Escape"){ e.stopPropagation(); close(); }
+    else if(e.key==="Tab") close();
+  }, true);
+  addEventListener("scroll",()=>dd&&place(),true); addEventListener("resize",()=>dd&&place());
+  return {close};
+})();
 
 /* ---------- events ---------- */
 document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{ S.view=b.dataset.view; ls.set("view",S.view); S.sel.clear(); render(); });
