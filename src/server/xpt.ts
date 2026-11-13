@@ -2,7 +2,8 @@
 export const FIELDS = ["titulo","area","responsavel","quantidade","especificacoes","status","prioridade","inicio","prazo","conclusao","observacao","validacao","vigencia"] as const;
 export const STATUSES = ["A fazer","Em andamento","Bloqueado","Concluído"];
 export const PRIS = ["Alta","Média","Baixa"];
-type Row = Record<string, any>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type Row = any;
 
 export const today = () => new Date().toLocaleDateString("sv-SE", { timeZone: "America/Sao_Paulo" });
 export function clean(k: string, v: unknown): string {
