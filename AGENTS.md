@@ -29,4 +29,4 @@ use the editor.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
 
-- The XPT board UI is the original self-contained page in `src/legacy/board.html`, served raw by `src/routes/index.tsx`; it calls relative `api/items` routes backed by the `xpt_items` table via the server-only admin client (no login by design, table has no client policies).
+- The XPT board UI is the original self-contained page in `src/legacy/board.html`, served raw by `src/routes/index.tsx`; it calls relative `api/items` routes and `api/bases` routes, backed by the `xpt_items` and `xpt_bases` tables via the server-only admin client (no login by design, tables have no client policies). Each item belongs to a base through `xpt_items.base_id`; `num` is unique per base.

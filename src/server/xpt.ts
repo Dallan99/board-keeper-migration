@@ -50,4 +50,24 @@ export async function saveItem(it: Row) {
   const { data, error } = await (await db()).update(toDb(it) as never).eq("id", it.id).select("*").single();
   if (error) throw error; return fromDb(data);
 }
+// --- Bases XPT (cada base tem a sua própria lista de itens) ---
+export const pad3 = (n: number) => String(n).padStart(3, "0");
+export const slug = (v: unknown) => String(v || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 40);
+export function baseInfo(b: Row) {
+  const o = { nome: String(b?.nome || "").slice(0, 120).trim(), codigo: String(b?.codigo || "").slice(0, 30).trim().toUpperCase(), abertura: String(b?.abertura || "").trim() };
+  if (!o.nome || !o.codigo) throw new Error("Nome e código são obrigatórios");
+  if (o.abertura && !/^\d{4}-\d{2}-\d{2}$/.test(o.abertura)) throw new Error("data inválida");
+  return o;
+}
+export const baseFromDb = ({ criado_em, ...r }: Row) => ({ ...r, criadoEm: criado_em });
+export async function basesDb() {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return (supabaseAdmin as any).from("xpt_bases");
+}
+export async function getBase(id: string) {
+  const { data, error } = await (await basesDb()).select("*").eq("id", id).maybeSingle();
+  if (error) throw error; return data ? baseFromDb(data) : null;
+}
+
 export const guard = (fn: () => Promise<Response>) => fn().catch((e: any) => text(e?.message || "Erro", 400));
