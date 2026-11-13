@@ -1,16 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { FIELDS, baseFromDb, baseInfo, basesDb, body, by, clean, db, fromDb, guard, json, pad3, slug, toDb } from "@/server/xpt";
+import { DEFAULT_BASE, FIELDS, MIGRATION_PENDING, baseFromDb, hasBases, baseInfo, basesDb, body, by, clean, db, fromDb, guard, json, pad3, slug, toDb } from "@/server/xpt";
 
 export const Route = createFileRoute("/api/bases/")({
   server: {
     handlers: {
       GET: () => guard(async () => {
+        if (!(await hasBases())) return json([DEFAULT_BASE]);
         const { data, error } = await (await basesDb()).select("*").order("criado_em");
         if (error) throw error;
         return json(data.map(baseFromDb));
       }),
       // Cria uma base nova já com a lista de itens enviada pela tela (lista padrão ou cópia de outra base).
       POST: ({ request }) => guard(async () => {
+        if (!(await hasBases())) throw new Error(MIGRATION_PENDING);
         const b = await body(request); const info = baseInfo(b);
         const t = await basesDb();
         const { data: all, error: e0 } = await t.select("id,codigo"); if (e0) throw e0;
