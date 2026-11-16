@@ -10,6 +10,8 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiBasesIndexRouteImport } from './routes/api/bases/index'
+import { Route as ApiBasesIdRouteImport } from './routes/api/bases/$id'
 import { Route as ApiItemsIndexRouteImport } from './routes/api/items/index'
 import { Route as ApiItemsIdRouteImport } from './routes/api/items/$id'
 import { Route as ApiItemsIdComentariosRouteImport } from './routes/api/items/$id.comentarios'
@@ -17,6 +19,16 @@ import { Route as ApiItemsIdComentariosRouteImport } from './routes/api/items/$i
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiBasesIndexRoute = ApiBasesIndexRouteImport.update({
+  id: '/api/bases/',
+  path: '/api/bases/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiBasesIdRoute = ApiBasesIdRouteImport.update({
+  id: '/api/bases/$id',
+  path: '/api/bases/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiItemsIndexRoute = ApiItemsIndexRouteImport.update({
@@ -37,40 +49,61 @@ const ApiItemsIdComentariosRoute = ApiItemsIdComentariosRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/api/bases/$id': typeof ApiBasesIdRoute
   '/api/items/$id': typeof ApiItemsIdRouteWithChildren
+  '/api/bases/': typeof ApiBasesIndexRoute
   '/api/items/': typeof ApiItemsIndexRoute
   '/api/items/$id/comentarios': typeof ApiItemsIdComentariosRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/api/bases/$id': typeof ApiBasesIdRoute
   '/api/items/$id': typeof ApiItemsIdRouteWithChildren
+  '/api/bases': typeof ApiBasesIndexRoute
   '/api/items': typeof ApiItemsIndexRoute
   '/api/items/$id/comentarios': typeof ApiItemsIdComentariosRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/api/bases/$id': typeof ApiBasesIdRoute
   '/api/items/$id': typeof ApiItemsIdRouteWithChildren
+  '/api/bases/': typeof ApiBasesIndexRoute
   '/api/items/': typeof ApiItemsIndexRoute
   '/api/items/$id/comentarios': typeof ApiItemsIdComentariosRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/api/items/$id' | '/api/items/' | '/api/items/$id/comentarios'
+    | '/'
+    | '/api/bases/$id'
+    | '/api/items/$id'
+    | '/api/bases/'
+    | '/api/items/'
+    | '/api/items/$id/comentarios'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/api/items/$id' | '/api/items' | '/api/items/$id/comentarios'
+  to:
+    | '/'
+    | '/api/bases/$id'
+    | '/api/items/$id'
+    | '/api/bases'
+    | '/api/items'
+    | '/api/items/$id/comentarios'
   id:
     | '__root__'
     | '/'
+    | '/api/bases/$id'
     | '/api/items/$id'
+    | '/api/bases/'
     | '/api/items/'
     | '/api/items/$id/comentarios'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ApiBasesIdRoute: typeof ApiBasesIdRoute
   ApiItemsIdRoute: typeof ApiItemsIdRouteWithChildren
+  ApiBasesIndexRoute: typeof ApiBasesIndexRoute
   ApiItemsIndexRoute: typeof ApiItemsIndexRoute
 }
 
@@ -81,6 +114,20 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/bases/': {
+      id: '/api/bases/'
+      path: '/api/bases'
+      fullPath: '/api/bases/'
+      preLoaderRoute: typeof ApiBasesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/bases/$id': {
+      id: '/api/bases/$id'
+      path: '/api/bases/$id'
+      fullPath: '/api/bases/$id'
+      preLoaderRoute: typeof ApiBasesIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/items/': {
@@ -121,7 +168,9 @@ const ApiItemsIdRouteWithChildren = ApiItemsIdRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ApiBasesIdRoute: ApiBasesIdRoute,
   ApiItemsIdRoute: ApiItemsIdRouteWithChildren,
+  ApiBasesIndexRoute: ApiBasesIndexRoute,
   ApiItemsIndexRoute: ApiItemsIndexRoute,
 }
 export const routeTree = rootRouteImport
