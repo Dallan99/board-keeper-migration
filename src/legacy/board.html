@@ -295,7 +295,9 @@ input[data-combo]:focus{cursor:text}
 const STATUSES = ["A fazer","Em andamento","Bloqueado","Concluído"];
 const STC = {"A fazer":"A","Em andamento":"E","Bloqueado":"B","Concluído":"C"};
 const PRIS = ["Alta","Média","Baixa"];
-const DEFAULT_AREAS = ["TI","Compras","Operação","RH","Locação e Contratos","Facilities","Segurança do Trabalho","Financeiro","Fiscal e Contábil","Jurídico","Obras","Segurança Patrimonial","Tarifas pagas e recebíveis"];
+const DEFAULT_AREAS = ["TI","Compras","Operação","RH","Locação e Contratos","Facilities","Segurança do Trabalho","Financeiro","Fiscal e Contábil","Jurídico","Obras","Segurança Patrimonial","Tarifas, pagas e recebíveis - custo e receita"];
+const DEFAULT_PEOPLE = ["Fernando","Henrique"];
+const DEFAULT_AREA_RESPONSAVEIS = {"Tarifas, pagas e recebíveis - custo e receita":"Henrique"};
 const FIELDS = {titulo:"Descrição",area:"Área",responsavel:"Responsável",quantidade:"Quantidade",especificacoes:"Dimensões / especificações",status:"Status",prioridade:"Prioridade",inicio:"Início",prazo:"Prazo",conclusao:"Conclusão",observacao:"Observação",validacao:"Teste / validação",vigencia:"Duração / vigência"};
 const LS = k => "jmxpt." + k;
 const ls = {get(k,d){try{const v=localStorage.getItem(LS(k));return v==null?d:JSON.parse(v)}catch(e){return d}}, set(k,v){try{localStorage.setItem(LS(k),JSON.stringify(v))}catch(e){}}};
@@ -439,7 +441,7 @@ function openingInfo(b){
 function baseStats(id){ const its=Store.items.filter(i=>i.base_id===id); const done=its.filter(i=>i.status==="Concluído").length;
   return {n:its.length, done, pct:its.length?Math.round(done/its.length*100):0, late:its.filter(i=>dueInfo(i).late).length, blocked:its.filter(i=>i.status==="Bloqueado").length, open:its.length-done}; }
 function areas(){ const s=new Set(DEFAULT_AREAS); Store.items.forEach(i=>i.area&&s.add(i.area)); return [...s]; }
-function people(){ const s=new Set(); Store.items.forEach(i=>i.responsavel&&s.add(i.responsavel)); if(me()) s.add(me()); return [...s].sort((a,b)=>a.localeCompare(b,"pt-BR")); }
+function people(){ const s=new Set(DEFAULT_PEOPLE); Store.items.forEach(i=>i.responsavel&&s.add(i.responsavel)); if(me()) s.add(me()); return [...s].sort((a,b)=>a.localeCompare(b,"pt-BR")); }
 
 function matches(it){
   const f=S.f;
@@ -679,7 +681,7 @@ function renderWho(){ const n=me(); $("#whoName").textContent=n||"Identifique-se
 
 /* ---------- item modal ---------- */
 function openItem(id, preset){
-  const isNew = !id; const it = isNew ? blankItem(0, {area:preset?.area||"", status:"A fazer", prioridade:"Média", responsavel:""}) : Store.items.find(x=>x.id===id);
+  const isNew = !id; const area = preset?.area||""; const it = isNew ? blankItem(0, {area, status:"A fazer", prioridade:"Média", responsavel:DEFAULT_AREA_RESPONSAVEIS[area]||""}) : Store.items.find(x=>x.id===id);
   if(!it) return; S.openId = id||"__new";
   const sel=(k,list)=>`<select class="inp" data-k="${k}">${list.map(v=>`<option${v===it[k]?" selected":""}>${esc(v)}</option>`).join("")}</select>`;
   const hist = (it.historico||[]).slice().reverse().map(h=> h.campo==="criado" ? `<div><b>${esc(h.por||"Alguém")}</b> criou o item · ${fmtDT(h.em)}</div>`
