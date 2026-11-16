@@ -836,6 +836,13 @@ main.addEventListener("change",async e=>{
   if(!await ensureName()){ render(); return; }
   try{ await Store.update(id,{[f]:t.value.trim()}); render(); }catch(err){ toast("Erro ao salvar: "+err.message); render(); }
 });
+main.addEventListener("focusout",async e=>{
+  const t=e.target;
+  if(!t.matches?.("input.inl[data-f]")) return;
+  const row=t.closest("tr[data-id]"), f=t.dataset.f, it=Store.items.find(x=>x.id===row?.dataset.id);
+  if(!row||!it||String(it[f]||"")===t.value.trim()) return;
+  try{ await Store.update(it.id,{[f]:t.value.trim()}); render(); }catch(err){ toast("Erro ao salvar: "+err.message); render(); }
+});
 main.addEventListener("keydown",e=>{ if(e.key==="Enter" && e.target.classList.contains("inl")) e.target.blur(); });
 // drag & drop on board
 let dragId=null;
