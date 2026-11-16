@@ -295,7 +295,7 @@ input[data-combo]:focus{cursor:text}
 const STATUSES = ["A fazer","Em andamento","Bloqueado","Concluído"];
 const STC = {"A fazer":"A","Em andamento":"E","Bloqueado":"B","Concluído":"C"};
 const PRIS = ["Alta","Média","Baixa"];
-const DEFAULT_AREAS = ["TI","Compras","Operação","RH","Locação e Contratos","Facilities","Segurança do Trabalho","Financeiro","Fiscal e Contábil","Jurídico","Obras","Segurança Patrimonial","Tarifas, pagas e recebíveis - custo e receita"];
+const DEFAULT_AREAS = ["TI","Compras","Operação","RH","Locação e Contratos","Facilities","Segurança do Trabalho","Financeiro","Fiscal e Contábil","Jurídico","Obras","Segurança Patrimonial","Tarifas, pagas e recebíveis - custo e receita","Tarifas - custo e receita","Compliance"];
 const DEFAULT_PEOPLE = ["Fernando","Henrique","Diretor","Gerente"];
 const DEFAULT_DIRECTORS = ["Ciro - Operações","Cadu - Executivo","JM - Geral","Ricardo - Financeiro","Israel - RH/Jurídico","Ana Paula - Compliance"];
 const DEFAULT_AREA_RESPONSAVEIS = {"Tarifas, pagas e recebíveis - custo e receita":"Henrique"};
@@ -615,7 +615,7 @@ function renderDash(list){
   const noResp=open.filter(i=>!i.responsavel); const noDue=open.filter(i=>!i.prazo); const blocked=open.filter(i=>i.status==="Bloqueado");
   const pct = list.length?Math.round(done/list.length*100):0;
   const colors={"Concluído":"var(--green)","Em andamento":"var(--blue)","Bloqueado":"var(--red)","A fazer":"#c3cadb"};
-  const byArea={}; list.forEach(i=>(byArea[i.area||"Sem área"] ||= []).push(i));
+  const byArea={}; areas().forEach(a=>byArea[a]=[]); list.forEach(i=>(byArea[i.area||"Sem área"] ||= []).push(i));
   const byResp={}; list.forEach(i=>(byResp[i.responsavel||"— Sem responsável —"] ||= []).push(i));
   const next=[...open].filter(i=>i.prazo).sort((a,b)=>a.prazo<b.prazo?-1:1).slice(0,12);
   const ob=openingInfo(curBase());
@@ -635,7 +635,7 @@ function renderDash(list){
       ${Object.keys(byArea).sort((a,b)=>areas().indexOf(a)-areas().indexOf(b)).map(a=>{ const its=byArea[a]; const n=its.length; const c=s=>its.filter(i=>i.status===s).length; const lt=its.filter(i=>dueInfo(i).late).length;
         return `<div class="arow" data-area="${esc(a)}" title="Ver itens de ${esc(a)}"><div class="nm">${esc(a)}</div>
         <div class="stack">${["Concluído","Em andamento","Bloqueado","A fazer"].map(s=>c(s)?`<i style="width:${c(s)/n*100}%;background:${colors[s]}" title="${s}: ${c(s)}"></i>`:"").join("")}</div>
-        <div class="pc">${Math.round(c("Concluído")/n*100)}% <span style="font-weight:400;color:var(--muted);font-size:12px">${c("Concluído")}/${n}</span></div><div class="lt">${lt?lt+" atras.":""}</div></div>`;}).join("")||`<div class="empty">Sem itens</div>`}
+        <div class="pc">${n?Math.round(c("Concluído")/n*100):0}% <span style="font-weight:400;color:var(--muted);font-size:12px">${c("Concluído")}/${n}</span></div><div class="lt">${lt?lt+" atras.":""}</div></div>`;}).join("")||`<div class="empty">Sem itens</div>`}
     </div>
     <div style="display:flex;flex-direction:column;gap:14px">
       <div class="panel"><h3>Próximos prazos</h3><div class="plist">${next.map(i=>{const d=dueInfo(i);return `<div class="pitem" data-open="${esc(i.id)}"><span class="due ${d.cls}" style="width:62px">${fmtD(i.prazo)}</span>${avatar(i.responsavel)}<span class="t" title="${esc(i.titulo)}">${esc(i.titulo)}</span></div>`}).join("")||`<div class="empty">Nenhum item em aberto com prazo definido.<br>Defina prazos na aba Lista.</div>`}</div></div>
