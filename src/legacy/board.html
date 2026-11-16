@@ -297,8 +297,9 @@ const STC = {"A fazer":"A","Em andamento":"E","Bloqueado":"B","Concluído":"C"};
 const PRIS = ["Alta","Média","Baixa"];
 const DEFAULT_AREAS = ["TI","Compras","Operação","RH","Locação e Contratos","Facilities","Segurança do Trabalho","Financeiro","Fiscal e Contábil","Jurídico","Obras","Segurança Patrimonial","Tarifas, pagas e recebíveis - custo e receita"];
 const DEFAULT_PEOPLE = ["Fernando","Henrique","Diretor","Gerente"];
+const DEFAULT_DIRECTORS = ["Ciro - Operações","Cadu - Executivo","JM - Geral","Ricardo - Financeiro","Israel - RH/Jurídico","Ana Paula - Compliance"];
 const DEFAULT_AREA_RESPONSAVEIS = {"Tarifas, pagas e recebíveis - custo e receita":"Henrique"};
-const FIELDS = {titulo:"Descrição",area:"Área",responsavel:"Responsável",quantidade:"Quantidade",especificacoes:"Dimensões / especificações",status:"Status",prioridade:"Prioridade",inicio:"Início",prazo:"Prazo",conclusao:"Conclusão",observacao:"Observação",validacao:"Teste / validação",vigencia:"Duração / vigência"};
+const FIELDS = {titulo:"Descrição",area:"Área",diretoria:"Diretoria",gerencia:"Gerência",responsavel:"Responsável",quantidade:"Quantidade",especificacoes:"Dimensões / especificações",status:"Status",prioridade:"Prioridade",inicio:"Início",prazo:"Prazo",conclusao:"Conclusão",observacao:"Observação",validacao:"Teste / validação",vigencia:"Duração / vigência"};
 const LS = k => "jmxpt." + k;
 const ls = {get(k,d){try{const v=localStorage.getItem(LS(k));return v==null?d:JSON.parse(v)}catch(e){return d}}, set(k,v){try{localStorage.setItem(LS(k),JSON.stringify(v))}catch(e){}}};
 
@@ -343,7 +344,7 @@ const pad3 = n => String(n).padStart(3,"0");
 const slug = v => (v||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"").slice(0,40);
 const DEFAULT_BASE = {id:"esp18", nome:"Franco da Rocha", codigo:"ESP18", abertura:"", criadoEm:""};
 function blankItem(num, data){
-  const it = {id:"XPT-"+pad3(num), num, base_id:data.base_id||"", titulo:"", area:"", responsavel:"", quantidade:"", especificacoes:"", status:"A fazer", prioridade:"Média", inicio:"", prazo:"", conclusao:"", observacao:"", validacao:"", vigencia:"", comentarios:[], historico:[], criadoEm:nowIso(), atualizadoEm:nowIso()};
+  const it = {id:"XPT-"+pad3(num), num, base_id:data.base_id||"", titulo:"", area:"", diretoria:"", gerencia:"", responsavel:"", quantidade:"", especificacoes:"", status:"A fazer", prioridade:"Média", inicio:"", prazo:"", conclusao:"", observacao:"", validacao:"", vigencia:"", comentarios:[], historico:[], criadoEm:nowIso(), atualizadoEm:nowIso()};
   for(const k of Object.keys(FIELDS)) if(data[k]!=null) it[k]=String(data[k]);
   return it;
 }
@@ -593,12 +594,14 @@ function renderList(list){
         <h4>${esc(a)}</h4><span class="meta">${its.length} itens · ${done} concluídos${late?` · <b style="color:var(--red)">${late} atrasados</b>`:""}</span>
         <span class="sp"></span><div class="prog hide-m"><i style="width:${its.length?Math.round(done/its.length*100):0}%"></i></div><span class="meta">${its.length?Math.round(done/its.length*100):0}%</span></div>
       <table><thead><tr><th class="c"><input type="checkbox" data-selall="${esc(a)}"${allSel?" checked":""}></th>
-        <th data-sort="num">Código${ar("num")}</th><th data-sort="titulo">Descrição${ar("titulo")}</th><th data-sort="responsavel">Responsável${ar("responsavel")}</th>
+        <th data-sort="num">Código${ar("num")}</th><th data-sort="titulo">Descrição${ar("titulo")}</th><th data-sort="diretoria">Diretoria${ar("diretoria")}</th><th data-sort="gerencia">Gerência${ar("gerencia")}</th><th data-sort="responsavel">Responsável${ar("responsavel")}</th>
         <th data-sort="status">Status${ar("status")}</th><th data-sort="prioridade" class="hide-m">Prioridade${ar("prioridade")}</th><th data-sort="prazo">Prazo${ar("prazo")}</th></tr></thead>
       <tbody>${its.map(it=>{ const d=dueInfo(it); return `<tr class="it${S.sel.has(it.id)?" sel":""}" data-id="${esc(it.id)}">
         <td class="c"><input type="checkbox" data-sel="${esc(it.id)}"${S.sel.has(it.id)?" checked":""}></td>
         <td class="key" style="white-space:nowrap">${esc(keyOf(it))}</td>
         <td class="ti" data-open="${esc(it.id)}">${esc(it.titulo)}${it.quantidade||it.especificacoes?`<div class="sub">${[it.quantidade&&("Qtd: "+it.quantidade),it.especificacoes].filter(Boolean).map(esc).join(" · ")}</div>`:""}${(it.comentarios||[]).length?` <span class="due">💬 ${it.comentarios.length}</span>`:""}</td>
+        <td style="white-space:nowrap"><input class="inl" data-combo="director" autocomplete="off" data-f="diretoria" value="${esc(it.diretoria||"")}" placeholder="Diretoria…"></td>
+        <td style="white-space:nowrap"><input class="inl" data-combo="manager" autocomplete="off" data-f="gerencia" value="${esc(it.gerencia||"")}" placeholder="Gerência…"></td>
         <td style="white-space:nowrap">${avatar(it.responsavel)} <input class="inl" data-combo="people" autocomplete="off" data-f="responsavel" value="${esc(it.responsavel)}" placeholder="Atribuir…"></td>
         <td><select data-f="status" class="chip st-${STC[it.status]}">${STATUSES.map(s=>`<option${s===it.status?" selected":""}>${s}</option>`).join("")}</select></td>
         <td class="hide-m pr"><span class="pri pri-${esc(it.prioridade)}"></span><select data-f="prioridade">${PRIS.map(p=>`<option${p===it.prioridade?" selected":""}>${p}</option>`).join("")}</select></td>
@@ -702,6 +705,8 @@ function openItem(id, preset){
     </div><div class="side">
       <label class="f">Status</label>${sel("status",STATUSES)}
       <label class="f">Área</label><input class="inp" data-k="area" data-combo="area" autocomplete="off" value="${esc(it.area)}" placeholder="Selecione ou digite uma nova área">
+      <label class="f">Diretoria</label><input class="inp" data-k="diretoria" data-combo="director" autocomplete="off" value="${esc(it.diretoria||"")}" placeholder="Selecione ou digite uma diretoria">
+      <label class="f">Gerência</label><input class="inp" data-k="gerencia" data-combo="manager" autocomplete="off" value="${esc(it.gerencia||"")}" placeholder="Selecione ou digite uma gerência">
       <label class="f">Responsável</label><input class="inp" data-k="responsavel" data-combo="people" autocomplete="off" value="${esc(it.responsavel)}" placeholder="Selecione ou digite um novo nome">
       <label class="f">Prioridade</label>${sel("prioridade",PRIS)}
       <div class="two"><div><label class="f">Início</label><input type="date" class="inp" data-k="inicio" value="${esc(it.inicio)}"></div>
@@ -739,7 +744,7 @@ function openItem(id, preset){
 const Combo = (() => {
   let inp=null, dd=null, hl=0, opts=[], typed=false;
   const norm = v => (v||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim();
-  const source = el => el.dataset.combo==="area" ? areas() : people();
+  const source = el => el.dataset.combo==="area" ? areas() : el.dataset.combo==="director" ? DEFAULT_DIRECTORS : people();
   function build(){
     const q = typed ? inp.value.trim() : "";
     const all = source(inp); const list = q ? all.filter(o=>norm(o).includes(norm(q))) : all;
@@ -748,7 +753,7 @@ const Combo = (() => {
     if(inp.dataset.combo==="people" && inp.dataset.f==="responsavel" && inp.value && !q) opts.unshift({v:"",label:"Remover responsável",clr:true});
     const cur = inp.value.trim();
     if(hl>=opts.length) hl=Math.max(0,opts.length-1);
-    const what = inp.dataset.combo==="area" ? "área" : "responsável";
+    const what = inp.dataset.combo==="area" ? "área" : inp.dataset.combo==="director" ? "diretoria" : inp.dataset.combo==="manager" ? "gerência" : "responsável";
     dd.innerHTML = (opts.length ? "" : `<div class="hint">Digite para adicionar ${what === "área" ? "uma nova área" : "um novo responsável"}</div>`) +
       opts.map((o,i)=>`<div class="op${i===hl?" hl":""}${o.isNew?" new":""}${o.clr?" clr":""}${!o.isNew&&!o.clr&&o.v===cur?" cur":""}" data-i="${i}">${o.isNew?`<b>+</b>Adicionar ${what} “${esc(o.label)}”`:o.clr?"✕ "+esc(o.label):(inp.dataset.combo==="people"?avatar(o.v):"")+`<span>${esc(o.label)}</span>`}</div>`).join("") +
       (!q && opts.length ? `<div class="hint">Não está na lista? Digite o nome para adicionar.</div>` : "");

@@ -1,5 +1,5 @@
 // Board item rules ported 1:1 from the original server.js.
-export const FIELDS = ["titulo","area","responsavel","quantidade","especificacoes","status","prioridade","inicio","prazo","conclusao","observacao","validacao","vigencia"] as const;
+export const FIELDS = ["titulo","area","diretoria","gerencia","responsavel","quantidade","especificacoes","status","prioridade","inicio","prazo","conclusao","observacao","validacao","vigencia"] as const;
 export const STATUSES = ["A fazer","Em andamento","Bloqueado","Concluído"];
 export const PRIS = ["Alta","Média","Baixa"];
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

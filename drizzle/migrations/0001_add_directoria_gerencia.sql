@@ -1,0 +1,3 @@
+ALTER TABLE public.xpt_items
+  ADD COLUMN IF NOT EXISTS diretoria text NOT NULL DEFAULT '',
+  ADD COLUMN IF NOT EXISTS gerencia text NOT NULL DEFAULT '';
