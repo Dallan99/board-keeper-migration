@@ -594,12 +594,13 @@ function renderList(list){
         <h4>${esc(a)}</h4><span class="meta">${its.length} itens · ${done} concluídos${late?` · <b style="color:var(--red)">${late} atrasados</b>`:""}</span>
         <span class="sp"></span><div class="prog hide-m"><i style="width:${its.length?Math.round(done/its.length*100):0}%"></i></div><span class="meta">${its.length?Math.round(done/its.length*100):0}%</span></div>
       <table><thead><tr><th class="c"><input type="checkbox" data-selall="${esc(a)}"${allSel?" checked":""}></th>
-        <th data-sort="num">Código${ar("num")}</th><th data-sort="titulo">Descrição${ar("titulo")}</th><th data-sort="diretoria">Diretoria${ar("diretoria")}</th><th data-sort="gerencia">Gerência${ar("gerencia")}</th><th data-sort="responsavel">Responsável${ar("responsavel")}</th>
+        <th data-sort="num">Código${ar("num")}</th><th data-sort="titulo">Descrição${ar("titulo")}</th><th data-sort="area">Área${ar("area")}</th><th data-sort="diretoria">Diretoria${ar("diretoria")}</th><th data-sort="gerencia">Gerência${ar("gerencia")}</th><th data-sort="responsavel">Responsável${ar("responsavel")}</th>
         <th data-sort="status">Status${ar("status")}</th><th data-sort="prioridade" class="hide-m">Prioridade${ar("prioridade")}</th><th data-sort="prazo">Prazo${ar("prazo")}</th></tr></thead>
       <tbody>${its.map(it=>{ const d=dueInfo(it); return `<tr class="it${S.sel.has(it.id)?" sel":""}" data-id="${esc(it.id)}">
         <td class="c"><input type="checkbox" data-sel="${esc(it.id)}"${S.sel.has(it.id)?" checked":""}></td>
         <td class="key" style="white-space:nowrap">${esc(keyOf(it))}</td>
         <td class="ti" data-open="${esc(it.id)}">${esc(it.titulo)}${it.quantidade||it.especificacoes?`<div class="sub">${[it.quantidade&&("Qtd: "+it.quantidade),it.especificacoes].filter(Boolean).map(esc).join(" · ")}</div>`:""}${(it.comentarios||[]).length?` <span class="due">💬 ${it.comentarios.length}</span>`:""}</td>
+        <td style="white-space:nowrap"><input class="inl" data-combo="area" autocomplete="off" data-f="area" value="${esc(it.area||"")}" placeholder="Área…"></td>
         <td style="white-space:nowrap"><input class="inl" data-combo="director" autocomplete="off" data-f="diretoria" value="${esc(it.diretoria||"")}" placeholder="Diretoria…"></td>
         <td style="white-space:nowrap"><input class="inl" data-combo="manager" autocomplete="off" data-f="gerencia" value="${esc(it.gerencia||"")}" placeholder="Gerência…"></td>
         <td style="white-space:nowrap">${avatar(it.responsavel)} <input class="inl" data-combo="people" autocomplete="off" data-f="responsavel" value="${esc(it.responsavel)}" placeholder="Atribuir…"></td>
