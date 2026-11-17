@@ -427,6 +427,8 @@ const Store = {
 
 /* ---------- state ---------- */
 const S = { view: ls.get("view","board"), f: ls.get("filters",{q:"",area:"",resp:"",status:"",due:"",pri:""}), sort: ls.get("sort",{k:"num",d:1}), closed: new Set(ls.get("closed",[])), sel:new Set(), openId:null };
+const clearFilters = () => { S.f={q:"",area:"",resp:"",status:"",due:"",pri:""}; ls.set("filters",S.f); };
+if(S.view==="board") clearFilters();
 const me = () => ls.get("me","");
 function seedItems(){ return JSON.parse(document.getElementById("seed").textContent).map(i=>({...i, base_id:DEFAULT_BASE.id})); }
 const curBase = () => Store.bases.find(b=>b.id===S.base) || Store.bases[0] || DEFAULT_BASE;
@@ -796,7 +798,7 @@ const Combo = (() => {
 })();
 
 /* ---------- events ---------- */
-document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{ S.view=b.dataset.view; ls.set("view",S.view); S.sel.clear(); render(); });
+document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{ S.view=b.dataset.view; if(S.view==="board") clearFilters(); ls.set("view",S.view); S.sel.clear(); render(); });
 $("#btnNew").onclick=()=>{ if(S.view==="bases") openBaseForm(); else openItem(null,{area:S.f.area}); };
 $("#btnBase").onclick=baseMenu;
 addEventListener("hashchange",()=>{ const h=location.hash.slice(1); if(h && h!==S.base && Store.bases.some(b=>b.id===h)) setBase(h); });
@@ -807,7 +809,7 @@ $("#fResp").onchange=e=>setFilter("resp",e.target.value);
 $("#fStatus").onchange=e=>setFilter("status",e.target.value);
 $("#fDue").onchange=e=>setFilter("due",e.target.value);
 $("#fPri").onchange=e=>setFilter("pri",e.target.value);
-$("#btnClear").onclick=()=>{ S.f={q:"",area:"",resp:"",status:"",due:"",pri:""}; ls.set("filters",S.f); render(); };
+$("#btnClear").onclick=()=>{ clearFilters(); render(); };
 $("#btnCsv").onclick=()=>{
   const cols=["key",...Object.keys(FIELDS)]; const q=v=>'"'+String(v??"").replace(/"/g,'""')+'"';
   const csv="﻿"+[cols.map(c=>q(c==="key"?"Código":FIELDS[c])).join(";"),...sortItems(filtered()).map(i=>cols.map(c=>q(c==="key"?keyOf(i):i[c])).join(";"))].join("\r\n");
