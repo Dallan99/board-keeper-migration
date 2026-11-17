@@ -301,6 +301,8 @@ input[data-combo]:focus{cursor:text}
 const STATUSES = ["A fazer","Em andamento","Bloqueado","Concluído"];
 const STC = {"A fazer":"A","Em andamento":"E","Bloqueado":"B","Concluído":"C"};
 const PRIS = ["Alta","Média","Baixa"];
+const priorityColor = value => value === "Alta" ? "var(--red)" : value === "Baixa" ? "var(--green)" : "var(--gold)";
+const priorityDot = value => `<span class="pri" style="background:${priorityColor(value)}" title="Prioridade ${esc(value||"Média")}"></span>`;
 const DEFAULT_AREAS = ["TI","Compras","Operação","RH","Locação e Contratos","Facilities","Segurança do Trabalho","Financeiro","Fiscal e Contábil","Jurídico","Obras","Segurança Patrimonial","Tarifas, pagas e recebíveis - custo e receita","Tarifas - custo e receita","Compliance","Terceirizada"];
 const DEFAULT_PEOPLE = ["Fernando","Henrique"];
 const DEFAULT_DIRECTORS = ["Ciro - Operações","Cadu - Executivo","JM - Geral","Ricardo - Financeiro","Israel - RH/Jurídico","Ana Paula - Compliance"];
@@ -565,7 +567,7 @@ function openBaseForm(id){
 function cardHTML(it){
   const d=dueInfo(it);
   return `<div class="card st-${STC[it.status]||"A"}" draggable="true" data-id="${esc(it.id)}">
-    <div class="row"><span class="pri pri-${esc(it.prioridade)}" title="Prioridade ${esc(it.prioridade)}"></span><span class="key">${esc(keyOf(it))}</span><span class="sp"></span><span class="chip">${esc(it.area||"Sem área")}</span></div>
+    <div class="row">${priorityDot(it.prioridade)}<span class="key">${esc(keyOf(it))}</span><span class="sp"></span><span class="chip">${esc(it.area||"Sem área")}</span></div>
     <div class="t">${esc(it.titulo)}</div>
     <div class="row">${avatar(it.responsavel)}<span style="font-size:12px;color:var(--muted)">${esc(it.responsavel||"Sem responsável")}</span><span class="sp"></span>${d.txt?`<span class="due ${d.cls}">${cal}${esc(d.txt)}</span>`:""}${(it.comentarios||[]).length?`<span class="due" title="Comentários">💬 ${it.comentarios.length}</span>`:""}</div>
   </div>`;
@@ -611,7 +613,7 @@ function renderList(list){
         <td style="white-space:nowrap"><input class="inl" data-combo="manager" autocomplete="off" data-f="gerencia" value="${esc(it.gerencia||"")}" placeholder="Gerência…"></td>
         <td style="white-space:nowrap">${avatar(it.responsavel)} <input class="inl" data-combo="people" autocomplete="off" data-f="responsavel" value="${esc(it.responsavel)}" placeholder="Atribuir…"></td>
         <td><select data-f="status" class="chip st-${STC[it.status]}">${STATUSES.map(s=>`<option${s===it.status?" selected":""}>${s}</option>`).join("")}</select></td>
-        <td class="hide-m pr"><span class="pri pri-${esc(it.prioridade)}"></span><select data-f="prioridade">${PRIS.map(p=>`<option${p===it.prioridade?" selected":""}>${p}</option>`).join("")}</select></td>
+        <td class="hide-m pr">${priorityDot(it.prioridade)}<select data-f="prioridade">${PRIS.map(p=>`<option${p===it.prioridade?" selected":""}>${p}</option>`).join("")}</select></td>
         <td style="white-space:nowrap"><input type="date" data-f="prazo" value="${esc(it.prazo)}">${d.cls==="late"||d.cls==="soon"?`<div class="due ${d.cls}" style="padding-left:6px">${esc(d.txt.split(" · ")[1]||d.txt)}</div>`:""}</td></tr>`;}).join("")}</tbody></table>
       <div class="gadd"><button data-add="${esc(a==="Sem área"?"":a)}">+ Adicionar item em ${esc(a)}</button></div></section>`;}).join("");
 }
