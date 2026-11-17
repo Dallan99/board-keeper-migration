@@ -81,7 +81,13 @@ main{padding:18px 20px 60px}
 .col.over{outline:2px dashed var(--navy-3);outline-offset:-4px;background:#e2e9f7}
 .cards{display:flex;flex-direction:column;gap:8px;max-height:calc(100vh - 230px);overflow:auto;padding:2px}
 .card{background:#fff;border-radius:9px;padding:10px 11px;box-shadow:var(--shadow);border:1px solid transparent;cursor:pointer}
-.card:hover{border-color:var(--line-2)}
+.card.st-E{background:#f1f5ff;border-color:#dce6ff}
+.card.st-B{background:#fff1f1;border-color:#f7dddd}
+.card.st-C{background:#eff9f3;border-color:#d8efdf}
+.card.st-E:hover{border-color:#b9ccf8}
+.card.st-B:hover{border-color:#efc1c1}
+.card.st-C:hover{border-color:#bfe2cb}
+.card:not(.st-E):not(.st-B):not(.st-C):hover{border-color:var(--line-2)}
 .card.drag{opacity:.4}
 .card .t{font-weight:500;margin:5px 0 9px;font-size:13.3px}
 .card .row{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
@@ -558,7 +564,7 @@ function openBaseForm(id){
 
 function cardHTML(it){
   const d=dueInfo(it);
-  return `<div class="card" draggable="true" data-id="${esc(it.id)}">
+  return `<div class="card st-${STC[it.status]||"A"}" draggable="true" data-id="${esc(it.id)}">
     <div class="row"><span class="pri pri-${esc(it.prioridade)}" title="Prioridade ${esc(it.prioridade)}"></span><span class="key">${esc(keyOf(it))}</span><span class="sp"></span><span class="chip">${esc(it.area||"Sem área")}</span></div>
     <div class="t">${esc(it.titulo)}</div>
     <div class="row">${avatar(it.responsavel)}<span style="font-size:12px;color:var(--muted)">${esc(it.responsavel||"Sem responsável")}</span><span class="sp"></span>${d.txt?`<span class="due ${d.cls}">${cal}${esc(d.txt)}</span>`:""}${(it.comentarios||[]).length?`<span class="due" title="Comentários">💬 ${it.comentarios.length}</span>`:""}</div>
